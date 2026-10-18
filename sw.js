@@ -1,9 +1,9 @@
-const VERSION = "v2";
+const VERSION = "v3";
 const SHELL = `quran-shell-${VERSION}`;
 const DATA = "quran-data-v2"; // surah data rarely changes; kept across shell versions
 const SHELL_FILES = [
   "./", "index.html", "styles.css", "app.js", "manifest.webmanifest",
-  "fonts/amiri-arabic-400-normal.woff2", "icons/icon-192.png", "icons/icon-512.png",
+  "fonts/amiri-arabic-400-normal.woff2", "icons/cover.jpg", "icons/icon-192.png", "icons/icon-512.png",
   "icons/maskable-512.png", "icons/apple-touch-icon.png", "data/meta.json",
 ];
 

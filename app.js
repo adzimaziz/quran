@@ -277,6 +277,17 @@
   $("#btn-offline").onclick = () => cacheAll(true);
   if (store.get("offline2", false)) $("#offline-status").textContent = "✓ Semua surah tersedia luar talian";
 
+  // ---------- splash cover ----------
+  const splash = $("#splash");
+  let splashGone = false, splashResolve;
+  const splashDone = new Promise((r) => (splashResolve = r));
+  function closeSplash() {
+    if (splashGone) return; splashGone = true;
+    splash.classList.add("out"); setTimeout(() => splash.remove(), 600); splashResolve();
+  }
+  splash.addEventListener("click", closeSplash);
+  setTimeout(closeSplash, 3500);
+
   // ---------- install prompt ----------
   const ov = $("#install-overlay");
   const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -286,6 +297,7 @@
 
   function showInstall() {
     if (standalone() || shown) return;
+    if (!splashGone) return splashDone.then(showInstall);
     try { if (sessionStorage.getItem("q:dismiss")) return; } catch {}
     shown = true;
     const steps = $("#install-steps");

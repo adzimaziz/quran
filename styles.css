@@ -129,3 +129,10 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
   position: fixed; left: 50%; bottom: calc(80px + var(--safe-b)); transform: translateX(-50%); z-index: 60;
   background: #111; color: #fff; padding: 8px 16px; border-radius: 999px; font-size: 14px; max-width: 90vw;
 }
+
+/* Splash cover */
+.splash { position: fixed; inset: 0; z-index: 100; background: #f3ead2 center / cover no-repeat; display: flex; justify-content: center; align-items: center; transition: opacity .5s; cursor: pointer; }
+.splash.out { opacity: 0; pointer-events: none; }
+.splash img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.splash-hint { position: absolute; bottom: calc(14px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: rgba(255,253,248,.85); color: #0f5a52; padding: 4px 14px; border-radius: 999px; font-size: 13px; animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
