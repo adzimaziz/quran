@@ -9,3 +9,6 @@ Semasa dibuka, aplikasi memaparkan prompt "Pasang" (butang pemasangan Chrome/And
 
 ## Data
 `data/` dijana dengan `scripts/build_data.py` daripada pakej npm `quran-json` (CC-BY-4.0). Fon Amiri (OFL).
+
+## GitHub Pages
+Settings → Pages → Source: *Deploy from a branch* → pilih branch dan folder `/ (root)`. Pautan: `https://<username>.github.io/quran/`.
