@@ -150,4 +150,4 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .menu-card:first-child { background: var(--accent-soft); border-color: transparent; }
 .back { margin: 4px 0 12px; padding: 8px 14px; }
 .view-title { margin: 4px 0 12px; font-size: 20px; }
-.aend { display: inline-grid; place-items: center; min-width: 1.15em; height: 1.15em; padding: 0 .12em; margin: 0 .15em; border: 2px solid var(--gold); border-radius: 999px; color: var(--gold); font-size: .5em; line-height: 1; vertical-align: middle; font-family: system-ui, sans-serif; }
+.aend { color: var(--gold); margin: 0 .1em; font-size: 1.2em; }
