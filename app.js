@@ -73,7 +73,18 @@
         <div class="menu-cards">
           <button class="menu-card" data-view="mark"><span class="mc-ico">🔖</span><b>Penanda buku</b><small>${bmCount() ? `${bmCount()} surah ada penanda` : "Belum ada penanda"}</small></button>
           <button class="menu-card" data-view="surah"><span class="mc-ico">📖</span><b>Cari surah</b><small>114 surah • cari nama atau ayat</small></button>
-        </div>` : `
+        </div>
+        <section class="refs">
+          <h3>Rujukan</h3>
+          <ul>
+            <li><b>Teks Arab (Uthmani):</b> pakej <i>quran-json</i> (CC-BY-4.0), berasal daripada projek Tanzil</li>
+            <li><b>Terjemahan Melayu:</b> Abdullah Muhammad Basmeih, <i>Tafsir Pimpinan Ar-Rahman</i> (versi Tanzil)</li>
+            <li><b>Terjemahan English &amp; transliterasi:</b> pakej <i>quran-json</i></li>
+            <li><b>Fon:</b> KFGQPC Uthmanic Script HAFS, Kompleks Percetakan Al-Quran Raja Fahd, Madinah</li>
+            <li><b>Audio:</b> Mishary Alafasy (cdn.islamic.network)</li>
+          </ul>
+          <p class="muted small">Sila bandingkan dengan Mushaf bercetak. Jika ada kesilapan, maklumkan kepada Mohammad Adzim.</p>
+        </section>` : `
         <button class="btn back" id="home-back">← Utama</button>
         ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
       <div id="results"></div>`;

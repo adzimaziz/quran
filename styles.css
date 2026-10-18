@@ -151,3 +151,7 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .back { margin: 4px 0 12px; padding: 8px 14px; }
 .view-title { margin: 4px 0 12px; font-size: 20px; }
 .aend { color: var(--gold); margin: 0 .1em; font-size: 1.2em; }
+.refs { margin-top: 22px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.refs h3 { margin: 0 0 6px; font-size: 16px; }
+.refs ul { margin: 0 0 8px; padding-left: 18px; font-size: 14px; }
+.refs li { margin-bottom: 4px; }
