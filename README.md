@@ -8,7 +8,7 @@ Hos di pelayan statik HTTPS (cth. GitHub Pages) supaya boleh dipasang. Untuk uji
 Semasa dibuka, aplikasi memaparkan prompt "Pasang" (butang pemasangan Chrome/Android; panduan manual untuk iOS Safari).
 
 ## Data
-`data/` dijana dengan `scripts/build_data.py` daripada pakej npm `quran-json` (CC-BY-4.0). Fon Amiri (OFL).
+`data/` dijana dengan `scripts/build_data.py` daripada pakej npm `quran-json` (CC-BY-4.0). Fon KFGQPC Uthmanic Script HAFS (fail asal tanpa ubahan; lesen dalam `fonts/LICENSE-KFGQPC.txt`).
 
 ## GitHub Pages
 Settings → Pages → Source: *Deploy from a branch* → pilih branch dan folder `/ (root)`. Pautan: `https://adzimaziz.github.io/quran/`.

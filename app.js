@@ -42,6 +42,7 @@
     if (!cache.has(n)) cache.set(n, fetch(`data/${n}.json`).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }));
     return cache.get(n);
   }
+  const arDigits = (n) => String(n).replace(/\d/g, (d) => "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[d]);
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   function toast(msg) {
     const t = $("#toast"); t.textContent = msg; t.hidden = false;
@@ -160,7 +161,7 @@
           <button data-act="play" aria-label="Main">▶</button>
           <button data-act="mark" class="${marked ? "on" : ""}" aria-label="Penanda">${marked ? "★" : "☆"}</button>
           <button data-act="copy" aria-label="Salin">⧉</button></div></div>
-        <div class="arab" lang="ar" dir="rtl">${d.a[i]}</div>
+        <div class="arab" lang="ar" dir="rtl">${d.a[i]} <span class="aend">${arDigits(a)}</span></div>
         ${settings.translit ? `<div class="translit">${esc(d.t[i])}</div>` : ""}
         ${lang ? `<div class="trans">${esc(d[lang][i])}</div>` : ""}
       </article>`;
