@@ -333,9 +333,37 @@
   // If the browser does not fire beforeinstallprompt (iOS Safari, Firefox...), show manual steps.
   setTimeout(() => { if (!deferred) showInstall(); }, isIOS || !("onbeforeinstallprompt" in window) ? 1200 : 3000);
 
+  // ---------- app updates ----------
+  const uOv = $("#update-overlay");
+  let waitingSW = null, reloading = false;
+  function offerUpdate(sw) {
+    waitingSW = sw;
+    $("#btn-update-top").hidden = false;
+    splashDone.then(() => { uOv.hidden = false; });
+  }
+  function applyUpdate() {
+    $("#btn-update").textContent = "Mengemas kini…";
+    if (waitingSW) waitingSW.postMessage("SKIP_WAITING"); else location.reload();
+  }
+  $("#btn-update").onclick = applyUpdate;
+  $("#btn-update-top").onclick = () => (uOv.hidden = false);
+  $("#btn-update-later").onclick = () => (uOv.hidden = true);
+
   // ---------- boot ----------
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => setTimeout(() => cacheAll(false), 3000)).catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !reloading) { reloading = true; location.reload(); }
+    });
+    navigator.serviceWorker.register("sw.js").then((reg) => {
+      const watch = (sw) => sw && sw.addEventListener("statechange", () => { if (sw.state === "installed" && navigator.serviceWorker.controller) offerUpdate(sw); });
+      if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
+      reg.addEventListener("updatefound", () => watch(reg.installing));
+      const check = () => reg.update().catch(() => {});
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
+      setInterval(check, 30 * 60 * 1000);
+      return navigator.serviceWorker.ready;
+    }).then(() => setTimeout(() => cacheAll(false), 3000)).catch(() => {});
   }
   route();
 })();

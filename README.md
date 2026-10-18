@@ -12,3 +12,6 @@ Semasa dibuka, aplikasi memaparkan prompt "Pasang" (butang pemasangan Chrome/And
 
 ## GitHub Pages
 Settings → Pages → Source: *Deploy from a branch* → pilih branch dan folder `/ (root)`. Pautan: `https://adzimaziz.github.io/quran/`.
+
+## Keluarkan kemas kini
+Tukar `VERSION` di `sw.js` setiap kali ada perubahan. Pengguna akan nampak popup "Versi baru tersedia" dan menekan **Kemas Kini Sekarang**.

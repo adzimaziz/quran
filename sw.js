@@ -1,4 +1,4 @@
-const VERSION = "v6";
+const VERSION = "v7";
 const SHELL = `quran-shell-${VERSION}`;
 const DATA = "quran-data-v2"; // surah data rarely changes; kept across shell versions
 const SHELL_FILES = [
@@ -8,8 +8,12 @@ const SHELL_FILES = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
+  // Bypass the HTTP cache so a new release is fetched fresh. The new worker then waits until
+  // the user taps "Kemas kini" in the app (see SKIP_WAITING below).
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES.map((u) => new Request(u, { cache: "reload" })))));
 });
+
+self.addEventListener("message", (e) => { if (e.data === "SKIP_WAITING") self.skipWaiting(); });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
