@@ -1,6 +1,6 @@
 # Al-Quran Digital (PWA)
 
-Al-Quran lengkap 114 surah (6,236 ayat) — teks Arab, terjemahan Indonesia/English, transliterasi, audio (Alafasy), penanda, carian, mod gelap. Boleh dipasang di telefon dan berfungsi tanpa internet.
+Al-Quran lengkap 114 surah (6,236 ayat) — teks Arab, terjemahan Melayu (Basmeih)/English, transliterasi, audio (Alafasy), penanda, carian, mod gelap. Boleh dipasang di telefon dan berfungsi tanpa internet.
 
 ## Jalankan
 Hos di pelayan statik HTTPS (cth. GitHub Pages) supaya boleh dipasang. Untuk ujian: `python3 -m http.server 8000`.

@@ -9,7 +9,8 @@
     get(k, d) { try { const v = localStorage.getItem("q:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem("q:" + k, JSON.stringify(v)); } catch {} },
   };
-  const settings = Object.assign({ theme: "auto", lang: "i", translit: false, size: 34 }, store.get("settings", {}));
+  const settings = Object.assign({ theme: "auto", lang: "m", translit: false, size: 34 }, store.get("settings", {}));
+  if (settings.lang === "i") settings.lang = "m"; // Indonesian removed; Malay (Basmeih) is the default
   const saveSettings = () => store.set("settings", settings);
   let bookmarks = store.get("bookmarks", []); // ["2:255"]
 
@@ -90,7 +91,7 @@
         const [s, a] = key.split(":").map(Number);
         const d = await getSurah(s);
         box.insertAdjacentHTML("beforeend", `<a class="hit" href="#/surah/${s}/${a}"><b>${esc(list[s - 1].t)} ${s}:${a}</b>
-          <div class="arab" style="font-size:26px">${d.a[a - 1]}</div><div>${esc(d[settings.lang || "i"][a - 1])}</div></a>`);
+          <div class="arab" style="font-size:26px">${d.a[a - 1]}</div><div>${esc(d[settings.lang || "m"][a - 1])}</div></a>`);
       }
       return;
     }
@@ -102,7 +103,7 @@
     box.innerHTML = html + (q.length >= 3 ? `<p class="empty" id="vs">Mencari dalam ayat…</p>` : "");
     if (q.length < 3) { if (!bySurah.length) box.innerHTML = `<p class="empty">Tiada surah dijumpai.</p>`; return; }
     const token = (renderResults.tok = {});
-    const key = settings.lang || "i";
+    const key = settings.lang || "m";
     const hits = [];
     const all = await Promise.all(list.map((s) => getSurah(s.n).catch(() => null)));
     if (renderResults.tok !== token) return;
@@ -194,7 +195,7 @@
   }
   async function copyAyah(n, a) {
     const d = await getSurah(n), s = (await getMeta())[n - 1];
-    const text = `${d.a[a - 1]}\n\n${d[settings.lang || "i"][a - 1]}\n— ${s.t} ${n}:${a}`;
+    const text = `${d.a[a - 1]}\n\n${d[settings.lang || "m"][a - 1]}\n— ${s.t} ${n}:${a}`;
     try {
       if (navigator.share) await navigator.share({ text });
       else { await navigator.clipboard.writeText(text); toast("Disalin"); }
@@ -261,20 +262,20 @@
   // ---------- offline ----------
   async function cacheAll(manual) {
     const st = $("#offline-status");
-    if (store.get("offline", false) && !manual) return;
+    if (store.get("offline2", false) && !manual) return;
     try {
       const list = await getMeta();
       let done = 0;
       for (let i = 0; i < list.length; i += 6) {
         await Promise.all(list.slice(i, i + 6).map((s) => getSurah(s.n).then(() => { done++; st.textContent = `Memuat turun ${done}/114…`; })));
       }
-      store.set("offline", true);
+      store.set("offline2", true);
       st.textContent = "✓ Semua surah tersedia luar talian";
       if (manual) toast("Siap! Boleh dibaca tanpa internet");
     } catch { st.textContent = "Gagal. Cuba lagi dengan internet."; }
   }
   $("#btn-offline").onclick = () => cacheAll(true);
-  if (store.get("offline", false)) $("#offline-status").textContent = "✓ Semua surah tersedia luar talian";
+  if (store.get("offline2", false)) $("#offline-status").textContent = "✓ Semua surah tersedia luar talian";
 
   // ---------- install prompt ----------
   const ov = $("#install-overlay");
