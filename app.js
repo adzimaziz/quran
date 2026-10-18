@@ -12,12 +12,16 @@
   const settings = Object.assign({ theme: "auto", lang: "m", translit: false, size: 34 }, store.get("settings", {}));
   if (settings.lang === "i") settings.lang = "m"; // Indonesian removed; Malay (Basmeih) is the default
   const saveSettings = () => store.set("settings", settings);
-  // Only one bookmark ("penanda buku") exists: {s: surah, a: ayah}. Setting a new one replaces the old.
-  let bookmark = store.get("bookmark", null);
-  if (!bookmark) { // migrate from the old multi-bookmark list: keep the most recent
-    const old = store.get("bookmarks", []);
-    if (old.length) { const [s, a] = old[old.length - 1].split(":").map(Number); bookmark = { s, a }; store.set("bookmark", bookmark); }
+  // Penanda buku: at most one per surah, stored as {surah: ayah}. A new one in the same surah replaces the old.
+  let bm = store.get("bm", null);
+  if (!bm) { // migrate from earlier versions (single {s,a} or list ["2:255"])
+    bm = {};
+    const one = store.get("bookmark", null);
+    if (one) bm[one.s] = one.a;
+    for (const k of store.get("bookmarks", [])) { const [s, a] = k.split(":").map(Number); bm[s] = a; }
+    store.set("bm", bm);
   }
+  const bmCount = () => Object.keys(bm).length;
 
   function applySettings() {
     document.documentElement.dataset.theme = settings.theme;
@@ -58,16 +62,23 @@
   window.addEventListener("hashchange", route);
 
   // ---------- home ----------
-  let homeState = { q: "" };
+  let homeState = { q: "", view: "menu" }; // view: menu | surah | mark
   async function renderHome() {
     const list = await getMeta();
     document.title = "Al-Quran Digital";
     app.innerHTML = `
       <section class="hero"><h1>Assalamualaikum 👋</h1><div class="muted">Baca Al-Quran 114 surah, 6,236 ayat</div></section>
-      ${bookmark ? `<a class="resume" href="#/surah/${bookmark.s}/${bookmark.a}"><span class="muted small">🔖 Penanda buku</span><b>${esc(list[bookmark.s - 1].t)} • ayat ${bookmark.a}</b></a>` : `<div class="resume muted small">Tekan ☆ pada mana-mana ayat untuk letak penanda buku.</div>`}
-      <input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">
+      ${homeState.view === "menu" ? `
+        <div class="menu-cards">
+          <button class="menu-card" data-view="mark"><span class="mc-ico">🔖</span><b>Penanda buku</b><small>${bmCount() ? `${bmCount()} surah ada penanda` : "Belum ada penanda"}</small></button>
+          <button class="menu-card" data-view="surah"><span class="mc-ico">📖</span><b>Cari surah</b><small>114 surah • cari nama atau ayat</small></button>
+        </div>` : `
+        <button class="btn back" id="home-back">← Utama</button>
+        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
       <div id="results"></div>`;
-    $("#q").addEventListener("input", (e) => { homeState.q = e.target.value; debounceResults(); });
+    app.querySelectorAll(".menu-card").forEach((b) => b.addEventListener("click", () => { homeState.view = b.dataset.view; renderHome(); }));
+    const back = $("#home-back"); if (back) back.addEventListener("click", () => { homeState.view = "menu"; homeState.q = ""; renderHome(); });
+    const q = $("#q"); if (q) { q.addEventListener("input", (e) => { homeState.q = e.target.value; debounceResults(); }); if (!homeState.q) q.focus(); }
     renderResults();
   }
   let rt; const debounceResults = () => { clearTimeout(rt); rt = setTimeout(renderResults, 200); };
@@ -75,13 +86,26 @@
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ\-'’`]/g, "");
   function surahRow(s) {
     return `<li><a class="s-item" href="#/surah/${s.n}"><div class="s-num"><span>${s.n}</span></div>
-      <div class="s-main"><b>${esc(s.t)}</b><small>${esc(s.id)} • ${s.type === "meccan" ? "Makkiyah" : "Madaniyah"} • ${s.v} ayat</small></div>
+      <div class="s-main"><b>${esc(s.t)}</b><small>${esc(s.id)} • ${s.type === "meccan" ? "Makkiyah" : "Madaniyah"} • ${s.v} ayat</small>${bm[s.n] ? `<small class="bm-tag">🔖 Penanda: ayat ${bm[s.n]}</small>` : ""}</div>
       <div class="s-ar">${s.ar}</div></a></li>`;
   }
   async function renderResults() {
     const box = $("#results"); if (!box) return;
     const list = await getMeta();
     const q = homeState.q.trim();
+    if (homeState.view === "menu") { box.innerHTML = ""; return; }
+    if (homeState.view === "mark") {
+      const keys = Object.keys(bm).map(Number).sort((x, y) => x - y);
+      if (!keys.length) { box.innerHTML = `<p class="empty">Belum ada penanda buku.<br>Tekan ☆ pada mana-mana ayat. Setiap surah boleh ada satu penanda.</p>`; return; }
+      box.innerHTML = `<ul class="list">${keys.map((n) => `<li class="bm-row"><a class="s-item" href="#/surah/${n}/${bm[n]}"><div class="s-num"><span>${n}</span></div>
+        <div class="s-main"><b>${esc(list[n - 1].t)}</b><small>Ayat ${bm[n]} daripada ${list[n - 1].v}</small></div><div class="s-ar">${list[n - 1].ar}</div></a>
+        <button class="bm-del" data-s="${n}" aria-label="Buang penanda">✕</button></li>`).join("")}</ul>`;
+      box.querySelectorAll(".bm-del").forEach((b) => b.addEventListener("click", () => {
+        delete bm[b.dataset.s]; store.set("bm", bm);
+        renderResults();
+      }));
+      return;
+    }
     if (!q) { box.innerHTML = `<ul class="list">${list.map(surahRow).join("")}</ul>`; return; }
     const nq = norm(q);
     const num = /^\d+$/.test(q) ? +q : 0;
@@ -130,7 +154,7 @@
       </div>
       ${showBism ? `<div class="bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>` : ""}`;
     for (let i = 0; i < d.a.length; i++) {
-      const a = i + 1, marked = !!bookmark && bookmark.s === n && bookmark.a === a;
+      const a = i + 1, marked = bm[n] === a;
       html += `<article class="ayah" id="a${a}" data-a="${a}">
         <div class="ayah-top"><span class="a-no">${n}:${a}</span><div class="a-tools">
           <button data-act="play" aria-label="Main">▶</button>
@@ -158,12 +182,12 @@
   }
 
   function toggleMark(n, a, btn) {
-    const same = bookmark && bookmark.s === n && bookmark.a === a;
-    bookmark = same ? null : { s: n, a };
-    store.set("bookmark", bookmark);
+    const same = bm[n] === a, replaced = bm[n] && !same;
+    if (same) delete bm[n]; else bm[n] = a;
+    store.set("bm", bm);
     app.querySelectorAll('.a-tools button[data-act="mark"]').forEach((b) => { b.classList.remove("on"); b.textContent = "☆"; });
     if (!same) { btn.classList.add("on"); btn.textContent = "★"; }
-    toast(same ? "Penanda buku dibuang" : "Penanda buku disimpan (yang lama diganti)");
+    toast(same ? "Penanda buku dibuang" : replaced ? "Penanda surah ini dipindahkan ke sini" : "Penanda buku disimpan");
   }
   async function copyAyah(n, a) {
     const d = await getSurah(n), s = (await getMeta())[n - 1];
