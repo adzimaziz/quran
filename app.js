@@ -12,7 +12,12 @@
   const settings = Object.assign({ theme: "auto", lang: "m", translit: false, size: 34 }, store.get("settings", {}));
   if (settings.lang === "i") settings.lang = "m"; // Indonesian removed; Malay (Basmeih) is the default
   const saveSettings = () => store.set("settings", settings);
-  let bookmarks = store.get("bookmarks", []); // ["2:255"]
+  // Only one bookmark ("penanda buku") exists: {s: surah, a: ayah}. Setting a new one replaces the old.
+  let bookmark = store.get("bookmark", null);
+  if (!bookmark) { // migrate from the old multi-bookmark list: keep the most recent
+    const old = store.get("bookmarks", []);
+    if (old.length) { const [s, a] = old[old.length - 1].split(":").map(Number); bookmark = { s, a }; store.set("bookmark", bookmark); }
+  }
 
   function applySettings() {
     document.documentElement.dataset.theme = settings.theme;
@@ -41,7 +46,6 @@
 
   // ---------- routing ----------
   async function route() {
-    stopObserve();
     const h = location.hash.replace(/^#\/?/, "");
     const m = h.match(/^surah\/(\d+)(?:\/(\d+))?$/);
     try {
@@ -54,25 +58,18 @@
   window.addEventListener("hashchange", route);
 
   // ---------- home ----------
-  let homeState = { q: "", tab: "surah" };
+  let homeState = { q: "" };
   async function renderHome() {
     const list = await getMeta();
     document.title = "Al-Quran Digital";
-    const last = store.get("last", null);
     app.innerHTML = `
       <section class="hero"><h1>Assalamualaikum 👋</h1><div class="muted">Baca Al-Quran 114 surah, 6,236 ayat</div></section>
-      ${last ? `<a class="resume" href="#/surah/${last.s}/${last.a}"><span class="muted small">Sambung bacaan</span><b>${esc(list[last.s - 1].t)} • ayat ${last.a}</b></a>` : ""}
+      ${bookmark ? `<a class="resume" href="#/surah/${bookmark.s}/${bookmark.a}"><span class="muted small">🔖 Penanda buku</span><b>${esc(list[bookmark.s - 1].t)} • ayat ${bookmark.a}</b></a>` : `<div class="resume muted small">Tekan ☆ pada mana-mana ayat untuk letak penanda buku.</div>`}
       <input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">
-      <div class="tabs">
-        <button class="tab ${homeState.tab === "surah" ? "on" : ""}" data-tab="surah">Surah</button>
-        <button class="tab ${homeState.tab === "mark" ? "on" : ""}" data-tab="mark">Penanda (${bookmarks.length})</button>
-      </div>
       <div id="results"></div>`;
-    $("#q").addEventListener("input", (e) => { homeState.q = e.target.value; homeState.tab = "surah"; debounceResults(); syncTabs(); });
-    app.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { homeState.tab = b.dataset.tab; syncTabs(); renderResults(); }));
+    $("#q").addEventListener("input", (e) => { homeState.q = e.target.value; debounceResults(); });
     renderResults();
   }
-  function syncTabs() { app.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === homeState.tab)); }
   let rt; const debounceResults = () => { clearTimeout(rt); rt = setTimeout(renderResults, 200); };
 
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ\-'’`]/g, "");
@@ -85,16 +82,6 @@
     const box = $("#results"); if (!box) return;
     const list = await getMeta();
     const q = homeState.q.trim();
-    if (homeState.tab === "mark") {
-      box.innerHTML = bookmarks.length ? "" : `<p class="empty">Belum ada penanda. Tekan ☆ pada mana-mana ayat.</p>`;
-      for (const key of bookmarks) {
-        const [s, a] = key.split(":").map(Number);
-        const d = await getSurah(s);
-        box.insertAdjacentHTML("beforeend", `<a class="hit" href="#/surah/${s}/${a}"><b>${esc(list[s - 1].t)} ${s}:${a}</b>
-          <div class="arab" style="font-size:26px">${d.a[a - 1]}</div><div>${esc(d[settings.lang || "m"][a - 1])}</div></a>`);
-      }
-      return;
-    }
     if (!q) { box.innerHTML = `<ul class="list">${list.map(surahRow).join("")}</ul>`; return; }
     const nq = norm(q);
     const num = /^\d+$/.test(q) ? +q : 0;
@@ -123,8 +110,6 @@
   }
 
   // ---------- reader ----------
-  let obs = null;
-  const stopObserve = () => { if (obs) { obs.disconnect(); obs = null; } };
   let current = null; // {n, data}
 
   async function renderSurah(n, focus) {
@@ -145,7 +130,7 @@
       </div>
       ${showBism ? `<div class="bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>` : ""}`;
     for (let i = 0; i < d.a.length; i++) {
-      const a = i + 1, marked = bookmarks.includes(`${n}:${a}`);
+      const a = i + 1, marked = !!bookmark && bookmark.s === n && bookmark.a === a;
       html += `<article class="ayah" id="a${a}" data-a="${a}">
         <div class="ayah-top"><span class="a-no">${n}:${a}</span><div class="a-tools">
           <button data-act="play" aria-label="Main">▶</button>
@@ -169,29 +154,16 @@
     });
     if (focus) { const el = $("#a" + focus); if (el) el.scrollIntoView({ block: "start" }); }
     else window.scrollTo(0, 0);
-    observeProgress();
     highlightPlaying();
   }
 
-  function observeProgress() {
-    let t;
-    const on = () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        const els = app.querySelectorAll(".ayah"); if (!els.length || !current) return;
-        for (const el of els) { if (el.getBoundingClientRect().bottom > 80) { store.set("last", { s: current.n, a: +el.dataset.a }); break; } }
-      }, 400);
-    };
-    window.addEventListener("scroll", on, { passive: true });
-    obs = { disconnect: () => window.removeEventListener("scroll", on) };
-  }
-
   function toggleMark(n, a, btn) {
-    const k = `${n}:${a}`, i = bookmarks.indexOf(k);
-    if (i >= 0) bookmarks.splice(i, 1); else bookmarks.push(k);
-    store.set("bookmarks", bookmarks);
-    const on = i < 0; btn.classList.toggle("on", on); btn.textContent = on ? "★" : "☆";
-    toast(on ? "Penanda ditambah" : "Penanda dibuang");
+    const same = bookmark && bookmark.s === n && bookmark.a === a;
+    bookmark = same ? null : { s: n, a };
+    store.set("bookmark", bookmark);
+    app.querySelectorAll('.a-tools button[data-act="mark"]').forEach((b) => { b.classList.remove("on"); b.textContent = "☆"; });
+    if (!same) { btn.classList.add("on"); btn.textContent = "★"; }
+    toast(same ? "Penanda buku dibuang" : "Penanda buku disimpan (yang lama diganti)");
   }
   async function copyAyah(n, a) {
     const d = await getSurah(n), s = (await getMeta())[n - 1];
