@@ -179,3 +179,5 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .g-btn.g1 { border-color: var(--g1) !important; color: var(--g1); } .g-btn.g2 { border-color: var(--g2) !important; color: var(--g2); }
 .g-btn.g1.on { background: var(--g1); color: #fff; } .g-btn.g2.on { background: var(--g2); color: #fff; }
 .ayah.gm1 { border-left: 6px solid var(--g1); } .ayah.gm2 { border-right: 6px solid var(--g2); }
+.a-pills { display: flex; gap: 6px; align-items: center; }
+.a-juz { font-size: 13px; font-weight: 700; color: var(--gold); background: color-mix(in srgb, var(--gold) 15%, transparent); padding: 2px 10px; border-radius: 999px; white-space: nowrap; }

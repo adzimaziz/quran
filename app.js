@@ -209,7 +209,7 @@
       if (jn) html += `<div class="juz-mark">Juzuk ${jn}</div>`;
       const gOn = GROUPS.filter((g) => grp[g] && grp[g].s === n && grp[g].a === a);
       html += `<article class="ayah ${gOn.map((g) => "gm" + g).join(" ")}" id="a${a}" data-a="${a}">
-        <div class="ayah-top"><span class="a-no">${n}:${a}</span><div class="a-tools">
+        <div class="ayah-top"><span class="a-pills"><span class="a-no">${n}:${a}</span><span class="a-juz">Juzuk ${juzOf(n, a)}</span></span><div class="a-tools">
           <button data-act="play" aria-label="Main">▶</button>
           <button data-act="mark" class="${marked ? "on" : ""}" aria-label="Penanda">${marked ? "★" : "☆"}</button>
           ${GROUPS.map((g) => `<button data-act="g${g}" class="g-btn g${g} ${gOn.includes(g) ? "on" : ""}" aria-label="Penanda Group ${g}">G${g}</button>`).join("")}
