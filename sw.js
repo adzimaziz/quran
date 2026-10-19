@@ -1,4 +1,4 @@
-const VERSION = "v19";
+const VERSION = "v20";
 const SHELL = `quran-shell-${VERSION}`;
 const DATA = "quran-data-v2"; // surah data rarely changes; kept across shell versions
 const SHELL_FILES = [
