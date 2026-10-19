@@ -155,5 +155,11 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .refs h3 { margin: 0 0 6px; font-size: 16px; }
 .refs ul { margin: 0 0 8px; padding-left: 18px; font-size: 14px; }
 .refs li { margin-bottom: 4px; }
-.juz-ar { font-size: 20px; max-width: 45%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
+.juz-ar { font-size: 20px; max-width: 42%; text-align: right; direction: rtl; line-height: 1.8; }
 .juz-mark { text-align: center; margin: 14px 0 8px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; width: fit-content; margin-inline: auto; }
+.refs summary { cursor: pointer; font-weight: 700; font-size: 16px; }
+.refs[open] summary { margin-bottom: 8px; }
+.refs { padding: 12px 16px; }
+.juz-head { margin: 18px 0 8px; padding: 6px 12px; font-size: 15px; color: var(--accent); background: var(--accent-soft); border-radius: 10px; position: sticky; top: 56px; z-index: 5; }
+.rub { flex: none; width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(var(--accent) 0 var(--p, 0%), var(--accent-soft) var(--p, 0%) 100%); border: 2px solid var(--accent); }
+.rub.full { background: var(--accent-soft); display: grid; place-items: center; font-weight: 700; font-size: 14px; color: var(--accent); }

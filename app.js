@@ -63,7 +63,7 @@
   window.addEventListener("hashchange", route);
 
   // ---------- home ----------
-  let homeState = { q: "", view: "menu", sort: "surah" }; // view: menu | surah | mark
+  let homeState = { q: "", view: "menu" }; // view: menu | surah | juz | mark
   async function renderHome() {
     const list = await getMeta();
     document.title = "Al-Quran Digital";
@@ -72,10 +72,11 @@
       ${homeState.view === "menu" ? `
         <div class="menu-cards">
           <button class="menu-card" data-view="mark"><span class="mc-ico">🔖</span><b>Penanda buku</b><small>${bmCount() ? `${bmCount()} surah ada penanda` : "Belum ada penanda"}</small></button>
+          <button class="menu-card" data-view="juz"><span class="mc-ico">📚</span><b>Juzuk &amp; Hizb</b><small>30 juzuk • 60 hizb • 240 suku</small></button>
           <button class="menu-card" data-view="surah"><span class="mc-ico">📖</span><b>Cari surah</b><small>114 surah • cari nama atau ayat</small></button>
         </div>
-        <section class="refs">
-          <h3>Rujukan</h3>
+        <details class="refs">
+          <summary>Rujukan</summary>
           <ul>
             <li><b>Teks Arab (Uthmani):</b> pakej <i>quran-json</i> (CC-BY-4.0), berasal daripada projek Tanzil</li>
             <li><b>Terjemahan Melayu:</b> Abdullah Muhammad Basmeih, <i>Tafsir Pimpinan Ar-Rahman</i> (versi Tanzil)</li>
@@ -84,18 +85,13 @@
             <li><b>Audio:</b> Mishary Alafasy (cdn.islamic.network)</li>
           </ul>
           <p class="muted small">Sila bandingkan dengan Mushaf bercetak. Jika ada kesilapan, maklumkan kepada Mohammad Adzim.</p>
-        </section>` : `
+        </details>` : `
         <button class="btn back" id="home-back">← Utama</button>
-        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">
-          <div class="tabs"><button class="tab ${homeState.sort === "surah" ? "on" : ""}" data-sort="surah">Ikut surah</button><button class="tab ${homeState.sort === "juz" ? "on" : ""}" data-sort="juz">Ikut juzuk</button></div>` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
+        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : homeState.view === "juz" ? `<h2 class="view-title">📚 Juzuk &amp; Hizb</h2>` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
       <div id="results"></div>`;
     app.querySelectorAll(".menu-card").forEach((b) => b.addEventListener("click", () => { homeState.view = b.dataset.view; renderHome(); }));
     const back = $("#home-back"); if (back) back.addEventListener("click", () => { homeState.view = "menu"; homeState.q = ""; renderHome(); });
-    app.querySelectorAll(".tab[data-sort]").forEach((b) => b.addEventListener("click", () => {
-      homeState.sort = b.dataset.sort; if (homeState.sort === "juz") { homeState.q = ""; $("#q").value = ""; }
-      app.querySelectorAll(".tab[data-sort]").forEach((t) => t.classList.toggle("on", t === b)); renderResults();
-    }));
-    const q = $("#q"); if (q) { q.addEventListener("input", (e) => { homeState.q = e.target.value; if (homeState.q.trim() && homeState.sort === "juz") { homeState.sort = "surah"; app.querySelectorAll(".tab[data-sort]").forEach((t) => t.classList.toggle("on", t.dataset.sort === "surah")); } debounceResults(); }); if (!homeState.q && homeState.sort === "surah") q.focus(); }
+    const q = $("#q"); if (q) { q.addEventListener("input", (e) => { homeState.q = e.target.value; debounceResults(); }); if (!homeState.q) q.focus(); }
     renderResults();
   }
   let rt; const debounceResults = () => { clearTimeout(rt); rt = setTimeout(renderResults, 200); };
@@ -106,19 +102,26 @@
       <div class="s-main"><b>${esc(s.t)}</b><small>${esc(s.id)} • ${s.type === "meccan" ? "Makkiyah" : "Madaniyah"} • ${s.v} ayat</small>${bm[s.n] ? `<small class="bm-tag">🔖 Penanda: ayat ${bm[s.n]}</small>` : ""}</div>
       <div class="s-ar">${s.ar}</div></a></li>`;
   }
-  // First ayah of each juzuk: [surah, ayah] (standard Hafs division; juzuk n starts at JUZ[n-1]).
-  const JUZ = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
-  const juzStartAt = (s, a) => JUZ.findIndex(([js, ja]) => js === s && ja === a) + 1; // 0 if none
+  // First ayah [surah, ayah] of each of the 240 rub\u02bf al-hizb (quarter hizb) in the standard Hafs division.
+  // Juzuk n starts at RUB[(n-1)*8]; hizb h starts at RUB[(h-1)*4].
+  const RUB = [[1,1],[2,26],[2,44],[2,60],[2,75],[2,92],[2,106],[2,124],[2,142],[2,158],[2,177],[2,189],[2,203],[2,219],[2,233],[2,243],[2,253],[2,263],[2,272],[2,283],[3,15],[3,33],[3,52],[3,75],[3,93],[3,113],[3,133],[3,153],[3,171],[3,186],[4,1],[4,12],[4,24],[4,36],[4,58],[4,74],[4,88],[4,100],[4,114],[4,135],[4,148],[4,163],[5,1],[5,12],[5,27],[5,41],[5,51],[5,67],[5,82],[5,97],[5,109],[6,13],[6,36],[6,59],[6,74],[6,95],[6,111],[6,127],[6,141],[6,151],[7,1],[7,31],[7,47],[7,65],[7,88],[7,117],[7,142],[7,156],[7,171],[7,189],[8,1],[8,22],[8,41],[8,61],[9,1],[9,19],[9,34],[9,46],[9,60],[9,75],[9,93],[9,111],[9,122],[10,11],[10,26],[10,53],[10,71],[10,90],[11,6],[11,24],[11,41],[11,61],[11,84],[11,108],[12,7],[12,30],[12,53],[12,77],[12,101],[13,5],[13,19],[13,35],[14,10],[14,28],[15,1],[15,50],[16,1],[16,30],[16,51],[16,75],[16,90],[16,111],[17,1],[17,23],[17,50],[17,70],[17,99],[18,17],[18,32],[18,51],[18,75],[18,99],[19,22],[19,59],[20,1],[20,55],[20,83],[20,111],[21,1],[21,29],[21,51],[21,83],[22,1],[22,19],[22,38],[22,60],[23,1],[23,36],[23,75],[24,1],[24,21],[24,35],[24,53],[25,1],[25,21],[25,53],[26,1],[26,52],[26,111],[26,181],[27,1],[27,27],[27,56],[27,82],[28,12],[28,29],[28,51],[28,76],[29,1],[29,26],[29,46],[30,1],[30,31],[30,54],[31,22],[32,11],[33,1],[33,18],[33,31],[33,51],[33,60],[34,10],[34,24],[34,46],[35,15],[35,41],[36,28],[36,60],[37,22],[37,83],[37,145],[38,21],[38,52],[39,8],[39,32],[39,53],[40,1],[40,21],[40,41],[40,66],[41,9],[41,25],[41,47],[42,13],[42,27],[42,51],[43,24],[43,57],[44,17],[45,12],[46,1],[46,21],[47,10],[47,33],[48,18],[49,1],[49,14],[50,27],[51,31],[52,24],[53,26],[54,9],[55,1],[56,1],[56,75],[57,16],[58,1],[58,14],[59,11],[60,7],[62,1],[63,4],[65,1],[66,1],[67,1],[68,1],[69,1],[70,19],[72,1],[73,20],[75,1],[76,19],[78,1],[80,1],[82,1],[84,1],[87,1],[90,1],[94,1],[100,9]];
+  const juzStartAt = (s, a) => { const i = RUB.findIndex(([rs, ra]) => rs === s && ra === a); return i >= 0 && i % 8 === 0 ? i / 8 + 1 : 0; };
   async function renderJuz(box, list) {
     const token = (renderJuz.tok = {});
-    const data = await Promise.all(JUZ.map(([s]) => getSurah(s)));
-    if (renderJuz.tok !== token || homeState.view !== "surah" || homeState.sort !== "juz") return;
-    box.innerHTML = `<ul class="list">${JUZ.map(([s, a], i) => {
-      const words = data[i].a[a - 1].replace(/\u06DE\s*/g, "").split(" ").slice(0, 5).join(" ");
-      return `<li><a class="s-item" href="#/surah/${s}/${a}"><div class="s-num"><span>${i + 1}</span></div>
-        <div class="s-main"><b>Juzuk ${i + 1}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small></div>
+    const surahs = [...new Set(RUB.map(([s]) => s))];
+    const data = {}; await Promise.all(surahs.map(async (s) => { data[s] = await getSurah(s); }));
+    if (renderJuz.tok !== token || homeState.view !== "juz") return;
+    let html = "";
+    RUB.forEach(([s, a], i) => {
+      const juz = Math.floor(i / 8) + 1, q = i % 4, hizb = Math.floor(i / 4) + 1;
+      if (i % 8 === 0) html += `${i ? "</ul>" : ""}<h3 class="juz-head">Juzuk ${juz}</h3><ul class="list">`;
+      const words = data[s].a[a - 1].replace(/\u06DE\s*/g, "").split(" ").slice(0, 3).join(" ");
+      const icon = q === 0 ? `<div class="rub full"><span>${hizb}</span></div>` : `<div class="rub" style="--p:${q * 25}%"></div>`;
+      html += `<li><a class="s-item" href="#/surah/${s}/${a}">${icon}
+        <div class="s-main"><b>${q === 0 ? `Hizb ${hizb}` : ["", "¼ hizb", "½ hizb", "¾ hizb"][q]}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small></div>
         <div class="s-ar juz-ar">${words}…</div></a></li>`;
-    }).join("")}</ul>`;
+    });
+    box.innerHTML = html + "</ul>";
   }
   async function renderResults() {
     const box = $("#results"); if (!box) return;
@@ -137,7 +140,7 @@
       }));
       return;
     }
-    if (!q && homeState.sort === "juz") { await renderJuz(box, list); return; }
+    if (homeState.view === "juz") { await renderJuz(box, list); return; }
     if (!q) { box.innerHTML = `<ul class="list">${list.map(surahRow).join("")}</ul>`; return; }
     const nq = norm(q);
     const num = /^\d+$/.test(q) ? +q : 0;
