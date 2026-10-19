@@ -8,21 +8,21 @@
   --emerald: #0f5a50; --emerald-soft: #e3f1ec; --on-emerald: #fbf7ec; --gold: #b8862b; --gold-text: #8a6114; --gold-soft: #fbf1dc;
   --g1: #2563eb; --g1-soft: #dbeafe; --g2: #db2777; --g2-soft: #fce7f3; --help-bg: #eef6f3; --help-line: #cfe3dc;
   --shadow: 0 3px 12px rgba(15, 90, 80, .07);
-  --arab-size: 30px;
+  --arab-size: 30px; --bg-tile: url("assets/bg-tile.png");
   --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
 }
 :root[data-theme="dark"] {
   --bg: #0f1614; --card: #17211e; --text: #e8efec; --muted: #a2b2ac; --line: #33443e; --line-soft: #2a3934;
   --emerald: #2fb09c; --emerald-soft: #163a34; --on-emerald: #06201c; --gold: #e0b252; --gold-text: #e9c06a; --gold-soft: #3a2f17;
   --g1: #6ea0ff; --g1-soft: #17294a; --g2: #f472b6; --g2-soft: #44172f; --help-bg: #15302a; --help-line: #24443c;
-  --shadow: none;
+  --shadow: none; --bg-tile: url("assets/bg-tile-dark.png");
 }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
     --bg: #0f1614; --card: #17211e; --text: #e8efec; --muted: #a2b2ac; --line: #33443e; --line-soft: #2a3934;
     --emerald: #2fb09c; --emerald-soft: #163a34; --on-emerald: #06201c; --gold: #e0b252; --gold-text: #e9c06a; --gold-soft: #3a2f17;
     --g1: #6ea0ff; --g1-soft: #17294a; --g2: #f472b6; --g2-soft: #44172f; --help-bg: #15302a; --help-line: #24443c;
-    --shadow: none;
+    --shadow: none; --bg-tile: url("assets/bg-tile-dark.png");
   }
 }
 
@@ -32,10 +32,7 @@ body {
   margin: 0; background: var(--bg); color: var(--text);
   font: 500 17px/1.5 "Jakarta", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-body::before { /* faint geometric pattern */
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: url("assets/orn-pattern.png") 0 0 / 300px auto repeat; opacity: .04;
-}
+body { background-image: var(--bg-tile); background-size: 238px auto; background-attachment: fixed; }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }

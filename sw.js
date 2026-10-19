@@ -1,4 +1,4 @@
-const VERSION = "v16";
+const VERSION = "v17";
 const SHELL = `quran-shell-${VERSION}`;
 const DATA = "quran-data-v2"; // surah data rarely changes; kept across shell versions
 const SHELL_FILES = [
@@ -19,7 +19,8 @@ const SHELL_FILES = [
   "assets/icon-settings.png",
   "assets/orn-divider.png",
   "assets/orn-header-band.png",
-  "assets/orn-pattern.png",
+  "assets/bg-tile.png",
+  "assets/bg-tile-dark.png",
   "assets/orn-title-frame.png",
 ];
 
