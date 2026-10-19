@@ -129,11 +129,11 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .grp-card small { font-size: 15px; color: var(--muted); }
 .grp-card.g1 { background: var(--g1-soft); border-color: var(--g1); } .grp-card.g1 .g-name { color: var(--g1); }
 .grp-card.g2 { background: var(--g2-soft); border-color: var(--g2); } .grp-card.g2 .g-name { color: var(--g2); }
-.juz-row.active { border-color: var(--g1); }
-.g-btns { flex: none; display: flex; flex-direction: column; gap: 8px; }
-.g-btn { min-height: 44px; min-width: 96px; padding: 0 12px; border-radius: 12px; background: var(--card); border: 2px solid; font-size: 15px; font-weight: 700; }
-.g-btn.g1 { border-color: var(--g1); color: var(--g1); } .g-btn.g1.on { background: var(--g1); color: #fff; }
-.g-btn.g2 { border-color: var(--g2); color: var(--g2); } .g-btn.g2.on { background: var(--g2); color: #fff; }
+.g-btns { flex: none; display: flex; gap: 10px; }
+.g-dot { width: 44px; height: 44px; border-radius: 50%; border: 3px solid; display: grid; place-items: center; font-size: 17px; font-weight: 700; text-decoration: none; background: var(--card); }
+.g-dot.g1 { border-color: var(--g1); color: var(--g1); } .g-dot.g1.on { background: var(--g1); color: #fff; }
+.g-dot.g2 { border-color: var(--g2); color: var(--g2); } .g-dot.g2.on { background: var(--g2); color: #fff; }
+.g-dot.g1.on { box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--g1); } .g-dot.g2.on { box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--g2); }
 
 /* Penanda buku */
 .bm-card { border-left: 6px solid var(--gold); display: flex; flex-direction: column; gap: 12px; }

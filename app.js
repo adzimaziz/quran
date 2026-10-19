@@ -3,7 +3,7 @@
   const $ = (s) => document.querySelector(s);
   const app = $("#app");
   const AUDIO = "https://cdn.islamic.network/quran/audio/128/ar.alafasy/";
-  const VERSION_LABEL = "Versi 15";
+  const VERSION_LABEL = "Versi 16";
 
   // ---------- storage ----------
   const store = {
@@ -210,20 +210,17 @@
       <div class="stack">
         <div class="grp-cards">${gcard(1)}${gcard(2)}</div>
         <div class="section-head"><h2>Senarai 30 Juzuk</h2></div>
-        <p class="muted" style="margin:0">Tekan butang <b style="color:var(--g1)">Group 1</b> atau <b style="color:var(--g2)">Group 2</b> untuk rekod bacaan Mak.</p>
+        <p class="muted" style="margin:0">Bulatan <b style="color:var(--g1)">biru</b> (Group 1) dan <b style="color:var(--g2)">merah jambu</b> (Group 2) penuh bila penanda group ada dalam juzuk itu. Tekan bulatan penuh untuk buka penanda. Untuk tanda, tekan <b>Tanda</b> pada ayat.</p>
         <ul class="list">${JUZ.map(([s, a], i) => {
           const j = i + 1;
-          const btns = GROUPS.map((g) => `<button class="g-btn g${g} ${grp[g] && juzOf(grp[g].s, grp[g].a) === j ? "on" : ""}" data-g="${g}" data-s="${s}" data-a="${a}">${grp[g] && juzOf(grp[g].s, grp[g].a) === j ? "✓ " : ""}Group ${g}</button>`).join("");
+          const btns = GROUPS.map((g) => grp[g] && juzOf(grp[g].s, grp[g].a) === j
+            ? `<a class="g-dot g${g} on" href="#/surah/${grp[g].s}/${grp[g].a}" aria-label="Buka penanda Group ${g}: ${place(list, grp[g])}">${g}</a>`
+            : `<span class="g-dot g${g}" aria-label="Group ${g}: tiada penanda dalam juzuk ini">${g}</span>`).join("");
           return `<li class="card" style="display:flex;align-items:center;padding-right:12px"><a class="row" style="flex:1;min-width:0" href="#/surah/${s}/${a}"><span class="num">${j}</span>
             <span class="row-main"><b>Juzuk ${j}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small><span class="juz-ar">${firstWords(data[i].a[a - 1], 3)}</span></span></a>
             <div class="g-btns">${btns}</div></li>`;
         }).join("")}</ul>
       </div>`;
-    app.querySelectorAll(".g-btn").forEach((b) => b.addEventListener("click", () => {
-      const y = window.scrollY;
-      setGroup(+b.dataset.g, +b.dataset.s, +b.dataset.a);
-      renderJuzuk().then(() => window.scrollTo(0, y));
-    }));
   }
 
   // ---------- Penanda Buku ----------
