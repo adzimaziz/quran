@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Al-Quran Digital</title>
+  <title>Al-Quran untuk Mak</title>
   <meta name="description" content="Al-Quran lengkap 114 surah dengan terjemahan, transliterasi dan audio.">
-  <meta name="theme-color" content="#0f766e">
+  <meta name="theme-color" content="#0f5a50">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -13,80 +13,83 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Al-Quran">
   <link rel="preload" href="fonts/KFGQPC-Uthmanic-Script-HAFS.otf" as="font" type="font/otf" crossorigin>
+  <link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="icons/cover.jpg" as="image">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="splash" class="splash" role="button" aria-label="Masuk"><img src="icons/cover.jpg" alt="Al-Quran untuk Mak — Umi Kalthum Binti Asmaon. Daripada: Mohammad Adzim"><span class="splash-hint">Ketik untuk masuk</span></div>
-  <header class="topbar">
-    <a class="brand" href="#/" aria-label="Utama">
-      <img class="brand-mark" src="icons/icon-192.png" alt="" width="30" height="30"><span class="brand-name">Al-Quran untuk Mak</span>
-    </a>
-    <div class="top-actions">
-      <button id="btn-update-top" class="chip" hidden>Kemas kini</button>
-      <button id="btn-install-top" class="chip" hidden>Pasang</button>
-      <button id="btn-settings" class="icon-btn" aria-label="Tetapan">⚙</button>
-    </div>
-  </header>
 
   <main id="app" tabindex="-1"></main>
 
+  <nav id="tabbar" class="tabbar" aria-label="Navigasi bawah">
+    <a href="#/" data-tab="home"><img src="assets/icon-home.png" alt=""><span>Utama</span></a>
+    <a href="#/pilihan" data-tab="pilihan"><img src="assets/icon-pilihan.png" alt=""><span>Surah Pilihan</span></a>
+    <a href="#/tetapan" data-tab="tetapan"><img src="assets/icon-settings.png" alt=""><span>Tetapan</span></a>
+  </nav>
+
   <div id="player" class="player" hidden>
-    <div class="player-info"><strong id="player-title"></strong><span id="player-sub"></span></div>
+    <div class="player-info"><small>Sedang dimainkan</small><strong id="player-title"></strong></div>
     <div class="player-ctrl">
-      <button id="p-prev" aria-label="Sebelum">⏮</button>
-      <button id="p-toggle" aria-label="Main/Jeda">⏸</button>
-      <button id="p-next" aria-label="Seterusnya">⏭</button>
+      <button id="p-prev" aria-label="Ayat sebelum">⏮</button>
+      <button id="p-toggle" class="main" aria-label="Main atau jeda">⏸</button>
+      <button id="p-next" aria-label="Ayat seterusnya">⏭</button>
       <button id="p-close" aria-label="Tutup">✕</button>
+    </div>
+  </div>
+
+  <!-- Tanda ayat (bottom sheet) -->
+  <div id="mark-overlay" class="overlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mark-title">
+      <div class="handle"></div>
+      <h2 id="mark-title">Tanda ayat ini</h2>
+      <p id="mark-sub" class="muted"></p>
+      <div class="mark-opts">
+        <button class="mark-opt gold" data-k="bm"><img src="assets/icon-bookmark.png" alt=""><span>Penanda saya</span><i>✓</i></button>
+        <button class="mark-opt blue" data-k="g1"><img src="assets/icon-group1.png" alt=""><span>Group 1</span><i>✓</i></button>
+        <button class="mark-opt pink" data-k="g2"><img src="assets/icon-group2.png" alt=""><span>Group 2</span><i>✓</i></button>
+      </div>
+      <p class="muted small">Setiap pilihan hanya satu tempat. Tanda baru akan menggantikan yang lama.</p>
+      <button id="mark-cancel" class="btn text">Batal</button>
+    </div>
+  </div>
+
+  <!-- Saiz tulisan (dari butang Aa) -->
+  <div id="size-overlay" class="overlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="size-title">
+      <div class="handle"></div>
+      <h2 id="size-title">Saiz tulisan Arab</h2>
+      <div class="size-row">
+        <button class="btn outline" data-size="-2">A− Kecil</button>
+        <b class="size-val"></b>
+        <button class="btn outline" data-size="2">A+ Besar</button>
+      </div>
+      <button id="size-done" class="btn primary">Siap</button>
     </div>
   </div>
 
   <!-- Install prompt -->
   <div id="install-overlay" class="overlay" hidden>
-    <div class="sheet install" role="dialog" aria-modal="true" aria-labelledby="install-title">
-      <img src="icons/icon-192.png" alt="" class="install-icon" width="72" height="72">
-      <h2 id="install-title">Pasang Al-Quran di telefon anda</h2>
-      <p id="install-text">Akses terus dari skrin utama, baca tanpa internet dan pengalaman skrin penuh seperti aplikasi.</p>
+    <div class="sheet center" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div class="handle"></div>
+      <img src="assets/icon-home.png" alt="" class="sheet-icon">
+      <h2 id="install-title">Pasang Al-Quran di telefon</h2>
+      <p class="muted">Buka terus dari skrin utama dan baca tanpa internet.</p>
       <ol id="install-steps" class="steps" hidden></ol>
-      <div class="install-actions">
-        <button id="btn-install" class="btn primary">Pasang Sekarang</button>
-        <button id="btn-install-later" class="btn ghost">Nanti</button>
-      </div>
+      <button id="btn-install" class="btn primary">Pasang Sekarang</button>
+      <button id="btn-install-later" class="btn text">Nanti</button>
     </div>
   </div>
 
   <!-- Update prompt -->
   <div id="update-overlay" class="overlay" hidden>
-    <div class="sheet install" role="dialog" aria-modal="true" aria-labelledby="update-title">
-      <img src="icons/icon-192.png" alt="" class="install-icon" width="72" height="72">
-      <h2 id="update-title">Versi baru tersedia 🎉</h2>
-      <p>Al-Quran ada kemas kini. Tekan butang di bawah untuk pasang versi terkini. Penanda buku dan tetapan anda kekal.</p>
-      <div class="install-actions">
-        <button id="btn-update" class="btn primary">Kemas Kini Sekarang</button>
-        <button id="btn-update-later" class="btn ghost">Nanti</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings -->
-  <div id="settings-overlay" class="overlay" hidden>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="set-title">
-      <div class="sheet-head"><h2 id="set-title">Tetapan</h2><button id="settings-close" class="icon-btn" aria-label="Tutup">✕</button></div>
-      <label class="row">Tema
-        <select id="set-theme"><option value="auto">Ikut sistem</option><option value="light">Cerah</option><option value="dark">Gelap</option></select>
-      </label>
-      <label class="row">Terjemahan
-        <select id="set-lang"><option value="m">Bahasa Melayu (Basmeih)</option><option value="e">English</option><option value="">Tiada</option></select>
-      </label>
-      <label class="row">Transliterasi (rumi)
-        <input type="checkbox" id="set-translit">
-      </label>
-      <label class="row col">Saiz tulisan Arab: <b id="size-val"></b>
-        <input type="range" id="set-size" min="24" max="56" step="2">
-      </label>
-      <button id="btn-offline" class="btn ghost">Muat turun semua untuk luar talian</button>
-      <p id="offline-status" class="muted"></p>
-      <p class="muted small">Teks Quran &amp; transliterasi: pakej <i>quran-json</i> (CC-BY-4.0). Terjemahan Melayu: Abdullah Muhammad Basmeih (Tanzil). Audio: Mishary Alafasy melalui cdn.islamic.network (perlu internet). Fon: KFGQPC Uthmanic Script HAFS (Kompleks Percetakan Al-Quran Raja Fahd).</p>
+    <div class="sheet center" role="dialog" aria-modal="true" aria-labelledby="update-title">
+      <div class="handle"></div>
+      <img src="assets/icon-continue.png" alt="" class="sheet-icon">
+      <h2 id="update-title">Versi baru tersedia</h2>
+      <p class="muted">Penanda dan tetapan Mak akan kekal.</p>
+      <button id="btn-update" class="btn primary">Kemas Kini Sekarang</button>
+      <button id="btn-update-later" class="btn text">Nanti</button>
     </div>
   </div>
 

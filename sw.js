@@ -1,10 +1,26 @@
-const VERSION = "v14";
+const VERSION = "v15";
 const SHELL = `quran-shell-${VERSION}`;
 const DATA = "quran-data-v2"; // surah data rarely changes; kept across shell versions
 const SHELL_FILES = [
   "./", "index.html", "styles.css", "app.js", "manifest.webmanifest",
-  "fonts/KFGQPC-Uthmanic-Script-HAFS.otf", "icons/cover.jpg", "icons/icon-192.png", "icons/icon-512.png",
-  "icons/maskable-512.png", "icons/apple-touch-icon.png", "data/meta.json",
+  "fonts/KFGQPC-Uthmanic-Script-HAFS.otf", "fonts/plus-jakarta-sans-latin-500-normal.woff2", "fonts/plus-jakarta-sans-latin-700-normal.woff2",
+  "icons/cover.jpg", "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "data/meta.json",
+  "assets/icon-back.png",
+  "assets/icon-bookmark.png",
+  "assets/icon-continue.png",
+  "assets/icon-group1.png",
+  "assets/icon-group2.png",
+  "assets/icon-help.png",
+  "assets/icon-home.png",
+  "assets/icon-juzuk.png",
+  "assets/icon-pilihan.png",
+  "assets/icon-play.png",
+  "assets/icon-search.png",
+  "assets/icon-settings.png",
+  "assets/orn-divider.png",
+  "assets/orn-header-band.png",
+  "assets/orn-pattern.png",
+  "assets/orn-title-frame.png",
 ];
 
 self.addEventListener("install", (e) => {
