@@ -72,7 +72,7 @@
       ${homeState.view === "menu" ? `
         <div class="menu-cards">
           <button class="menu-card" data-view="mark"><span class="mc-ico">🔖</span><b>Penanda buku</b><small>${bmCount() ? `${bmCount()} surah ada penanda` : "Belum ada penanda"}</small></button>
-          <button class="menu-card" data-view="juz"><span class="mc-ico">📚</span><b>Juzuk &amp; Hizb</b><small>30 juzuk • 60 hizb • 240 suku</small></button>
+          <button class="menu-card" data-view="juz"><span class="mc-ico">📚</span><b>Juzuk</b><small>30 juzuk • penanda Group 1 &amp; Group 2</small></button>
           <button class="menu-card" data-view="surah"><span class="mc-ico">📖</span><b>Cari surah</b><small>114 surah • cari nama atau ayat</small></button>
         </div>
         <details class="refs">
@@ -87,7 +87,7 @@
           <p class="muted small">Sila bandingkan dengan Mushaf bercetak. Jika ada kesilapan, maklumkan kepada Mohammad Adzim.</p>
         </details>` : `
         <button class="btn back" id="home-back">← Utama</button>
-        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : homeState.view === "juz" ? `<h2 class="view-title">📚 Juzuk &amp; Hizb</h2>` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
+        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : homeState.view === "juz" ? `<h2 class="view-title">📚 Juzuk</h2>` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
       <div id="results"></div>`;
     app.querySelectorAll(".menu-card").forEach((b) => b.addEventListener("click", () => { homeState.view = b.dataset.view; renderHome(); }));
     const back = $("#home-back"); if (back) back.addEventListener("click", () => { homeState.view = "menu"; homeState.q = ""; renderHome(); });
@@ -102,26 +102,41 @@
       <div class="s-main"><b>${esc(s.t)}</b><small>${esc(s.id)} • ${s.type === "meccan" ? "Makkiyah" : "Madaniyah"} • ${s.v} ayat</small>${bm[s.n] ? `<small class="bm-tag">🔖 Penanda: ayat ${bm[s.n]}</small>` : ""}</div>
       <div class="s-ar">${s.ar}</div></a></li>`;
   }
-  // First ayah [surah, ayah] of each of the 240 rub\u02bf al-hizb (quarter hizb) in the standard Hafs division.
-  // Juzuk n starts at RUB[(n-1)*8]; hizb h starts at RUB[(h-1)*4].
-  const RUB = [[1,1],[2,26],[2,44],[2,60],[2,75],[2,92],[2,106],[2,124],[2,142],[2,158],[2,177],[2,189],[2,203],[2,219],[2,233],[2,243],[2,253],[2,263],[2,272],[2,283],[3,15],[3,33],[3,52],[3,75],[3,93],[3,113],[3,133],[3,153],[3,171],[3,186],[4,1],[4,12],[4,24],[4,36],[4,58],[4,74],[4,88],[4,100],[4,114],[4,135],[4,148],[4,163],[5,1],[5,12],[5,27],[5,41],[5,51],[5,67],[5,82],[5,97],[5,109],[6,13],[6,36],[6,59],[6,74],[6,95],[6,111],[6,127],[6,141],[6,151],[7,1],[7,31],[7,47],[7,65],[7,88],[7,117],[7,142],[7,156],[7,171],[7,189],[8,1],[8,22],[8,41],[8,61],[9,1],[9,19],[9,34],[9,46],[9,60],[9,75],[9,93],[9,111],[9,122],[10,11],[10,26],[10,53],[10,71],[10,90],[11,6],[11,24],[11,41],[11,61],[11,84],[11,108],[12,7],[12,30],[12,53],[12,77],[12,101],[13,5],[13,19],[13,35],[14,10],[14,28],[15,1],[15,50],[16,1],[16,30],[16,51],[16,75],[16,90],[16,111],[17,1],[17,23],[17,50],[17,70],[17,99],[18,17],[18,32],[18,51],[18,75],[18,99],[19,22],[19,59],[20,1],[20,55],[20,83],[20,111],[21,1],[21,29],[21,51],[21,83],[22,1],[22,19],[22,38],[22,60],[23,1],[23,36],[23,75],[24,1],[24,21],[24,35],[24,53],[25,1],[25,21],[25,53],[26,1],[26,52],[26,111],[26,181],[27,1],[27,27],[27,56],[27,82],[28,12],[28,29],[28,51],[28,76],[29,1],[29,26],[29,46],[30,1],[30,31],[30,54],[31,22],[32,11],[33,1],[33,18],[33,31],[33,51],[33,60],[34,10],[34,24],[34,46],[35,15],[35,41],[36,28],[36,60],[37,22],[37,83],[37,145],[38,21],[38,52],[39,8],[39,32],[39,53],[40,1],[40,21],[40,41],[40,66],[41,9],[41,25],[41,47],[42,13],[42,27],[42,51],[43,24],[43,57],[44,17],[45,12],[46,1],[46,21],[47,10],[47,33],[48,18],[49,1],[49,14],[50,27],[51,31],[52,24],[53,26],[54,9],[55,1],[56,1],[56,75],[57,16],[58,1],[58,14],[59,11],[60,7],[62,1],[63,4],[65,1],[66,1],[67,1],[68,1],[69,1],[70,19],[72,1],[73,20],[75,1],[76,19],[78,1],[80,1],[82,1],[84,1],[87,1],[90,1],[94,1],[100,9]];
-  const juzStartAt = (s, a) => { const i = RUB.findIndex(([rs, ra]) => rs === s && ra === a); return i >= 0 && i % 8 === 0 ? i / 8 + 1 : 0; };
+  // First ayah [surah, ayah] of each juzuk (standard Hafs division).
+  const JUZ = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
+  const juzStartAt = (s, a) => JUZ.findIndex(([js, ja]) => js === s && ja === a) + 1; // 0 if none
+  const juzOf = (s, a) => { let j = 1; JUZ.forEach(([js, ja], i) => { if (s > js || (s === js && a >= ja)) j = i + 1; }); return j; };
+
+  // Group reading bookmarks (Mak's two Yasin groups): one position each, {1: {s, a}, 2: {s, a}}.
+  const GROUPS = [1, 2];
+  let grp = store.get("grp", {});
+  function setGroup(g, s, a) {
+    const cur = grp[g], same = cur && cur.s === s && cur.a === a;
+    if (same) delete grp[g]; else grp[g] = { s, a };
+    store.set("grp", grp);
+    toast(same ? `Penanda Group ${g} dibuang` : `Penanda Group ${g} disimpan`);
+    return !same;
+  }
   async function renderJuz(box, list) {
     const token = (renderJuz.tok = {});
-    const surahs = [...new Set(RUB.map(([s]) => s))];
-    const data = {}; await Promise.all(surahs.map(async (s) => { data[s] = await getSurah(s); }));
+    const data = await Promise.all(JUZ.map(([s]) => getSurah(s)));
     if (renderJuz.tok !== token || homeState.view !== "juz") return;
-    let html = "";
-    RUB.forEach(([s, a], i) => {
-      const juz = Math.floor(i / 8) + 1, q = i % 4, hizb = Math.floor(i / 4) + 1;
-      if (i % 8 === 0) html += `${i ? "</ul>" : ""}<h3 class="juz-head">Juzuk ${juz}</h3><ul class="list">`;
-      const words = data[s].a[a - 1].replace(/\u06DE\s*/g, "").split(" ").slice(0, 3).join(" ");
-      const icon = q === 0 ? `<div class="rub full"><span>${hizb}</span></div>` : `<div class="rub" style="--p:${q * 25}%"></div>`;
-      html += `<li><a class="s-item" href="#/surah/${s}/${a}">${icon}
-        <div class="s-main"><b>${q === 0 ? `Hizb ${hizb}` : ["", "¼ hizb", "½ hizb", "¾ hizb"][q]}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small></div>
-        <div class="s-ar juz-ar">${words}…</div></a></li>`;
-    });
-    box.innerHTML = html + "</ul>";
+    const gcards = GROUPS.map((g) => {
+      const p = grp[g];
+      return p ? `<a class="grp-card g${g}" href="#/surah/${p.s}/${p.a}"><span class="g-badge g${g}">Group ${g}</span>
+          <b>Juzuk ${juzOf(p.s, p.a)}</b><small>${esc(list[p.s - 1].t)}, ayat ${p.a}</small></a>`
+        : `<div class="grp-card g${g} empty"><span class="g-badge g${g}">Group ${g}</span><small>Belum ditanda. Tekan "G${g}" pada juzuk di bawah atau pada mana-mana ayat.</small></div>`;
+    }).join("");
+    box.innerHTML = `<div class="grp-cards">${gcards}</div><ul class="list">${JUZ.map(([s, a], i) => {
+      const j = i + 1, words = data[i].a[a - 1].replace(/\u06DE\s*/g, "").split(" ").slice(0, 3).join(" ");
+      const tags = GROUPS.map((g) => `<button class="g-btn g${g} ${grp[g] && juzOf(grp[g].s, grp[g].a) === j ? "on" : ""}" data-g="${g}" data-s="${s}" data-a="${a}" aria-label="Tanda Group ${g}">G${g}</button>`).join("");
+      return `<li class="juz-row"><a class="s-item" href="#/surah/${s}/${a}"><div class="s-num"><span>${j}</span></div>
+        <div class="s-main"><b>Juzuk ${j}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small><div class="s-ar juz-ar">${words}…</div></div></a>
+        <div class="g-btns">${tags}</div></li>`;
+    }).join("")}</ul>`;
+    box.querySelectorAll(".g-btn").forEach((b) => b.addEventListener("click", () => {
+      setGroup(+b.dataset.g, +b.dataset.s, +b.dataset.a); renderJuz(box, list);
+    }));
   }
   async function renderResults() {
     const box = $("#results"); if (!box) return;
@@ -192,10 +207,12 @@
       const a = i + 1, marked = bm[n] === a;
       const jn = juzStartAt(n, a);
       if (jn) html += `<div class="juz-mark">Juzuk ${jn}</div>`;
-      html += `<article class="ayah" id="a${a}" data-a="${a}">
+      const gOn = GROUPS.filter((g) => grp[g] && grp[g].s === n && grp[g].a === a);
+      html += `<article class="ayah ${gOn.map((g) => "gm" + g).join(" ")}" id="a${a}" data-a="${a}">
         <div class="ayah-top"><span class="a-no">${n}:${a}</span><div class="a-tools">
           <button data-act="play" aria-label="Main">▶</button>
           <button data-act="mark" class="${marked ? "on" : ""}" aria-label="Penanda">${marked ? "★" : "☆"}</button>
+          ${GROUPS.map((g) => `<button data-act="g${g}" class="g-btn g${g} ${gOn.includes(g) ? "on" : ""}" aria-label="Penanda Group ${g}">G${g}</button>`).join("")}
           <button data-act="copy" aria-label="Salin">⧉</button></div></div>
         <div class="arab" lang="ar" dir="rtl">${d.a[i]} <span class="aend">${arDigits(a)}</span></div>
         ${settings.translit ? `<div class="translit">${esc(d.t[i])}</div>` : ""}
@@ -211,6 +228,12 @@
         if (act === "play") play(n, a);
         if (act === "mark") toggleMark(n, a, e.target);
         if (act === "copy") copyAyah(n, a);
+        if (act === "g1" || act === "g2") {
+          const g = +act[1], on = setGroup(g, n, a);
+          app.querySelectorAll(`.a-tools .g-btn.g${g}`).forEach((b) => b.classList.remove("on"));
+          app.querySelectorAll(".ayah.gm" + g).forEach((x) => x.classList.remove("gm" + g));
+          if (on) { e.target.classList.add("on"); el.classList.add("gm" + g); }
+        }
       });
     });
     if (focus) { const el = $("#a" + focus); if (el) el.scrollIntoView({ block: "start" }); }
