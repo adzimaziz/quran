@@ -197,13 +197,6 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .aend { color: var(--gold); margin: 0 .1em; font-size: 1.2em; }
 .translit { color: var(--emerald); font-style: italic; font-size: 16px; margin: 0 0 8px; }
 .trans { background: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: 17px; line-height: 1.6; }
-.acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
-.act { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 8px; border-radius: 12px; border: 1.5px solid var(--emerald); background: var(--card); color: var(--emerald); font-size: 15px; font-weight: 700; }
-.act img { width: 26px; height: 26px; }
-.act.on { background: var(--emerald); color: var(--on-emerald); }
-.act.m-bm { border-color: var(--gold); color: var(--gold-text); }
-.act.m-g1 { border-color: var(--g1); color: var(--g1); }
-.act.m-g2 { border-color: var(--g2); color: var(--g2); }
 .juz-mark { align-self: center; padding: 4px 14px; font-size: 14px; font-weight: 700; color: var(--gold-text); border: 1.5px solid var(--gold); border-radius: 999px; background: var(--card); }
 .surah-nav { display: flex; gap: 10px; }
 .surah-nav .btn { flex: 1; }
@@ -264,3 +257,9 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .splash img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
 .splash-hint { position: absolute; bottom: calc(14px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: rgba(255,253,248,.88); color: #0f5a50; padding: 6px 16px; border-radius: 999px; font-size: 15px; font-weight: 700; animation: pulse 1.6s infinite; }
 @keyframes pulse { 50% { opacity: .45; } }
+.ayah-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.acts { flex: none; display: flex; gap: 8px; }
+.icon-act { width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: transparent; display: grid; place-items: center; }
+.icon-act img { width: 44px; height: 44px; }
+.icon-act.on-play { border-color: var(--emerald); }
+.icon-act.on-bm { border-color: var(--gold); background: var(--gold-soft); }

@@ -3,7 +3,7 @@
   const $ = (s) => document.querySelector(s);
   const app = $("#app");
   const AUDIO = "https://cdn.islamic.network/quran/audio/128/ar.alafasy/";
-  const VERSION_LABEL = "Versi 17";
+  const VERSION_LABEL = "Versi 18";
 
   // ---------- storage ----------
   const store = {
@@ -343,24 +343,24 @@
   }
   function markParts(n, a) {
     const st = markState(n, a);
-    const pills = (st.bm ? `<span class="pill st-bm">Penanda</span>` : "") + (st.g1 ? `<span class="pill st-g1">Group 1</span>` : "") + (st.g2 ? `<span class="pill st-g2">Group 2</span>` : "");
-    const first = st.bm ? "bm" : st.g1 ? "g1" : st.g2 ? "g2" : "";
-    const label = first ? "✓ " + { bm: "Penanda", g1: "Group 1", g2: "Group 2" }[first] : "Tanda";
-    return { st, pills, first, label };
+    const pills = (st.g1 ? `<span class="pill st-g1">G1</span>` : "") + (st.g2 ? `<span class="pill st-g2">G2</span>` : "");
+    return { st, pills };
   }
   function ayahHtml(n, a, d) {
     const i = a - 1, lang = settings.lang, mp = markParts(n, a);
     const cls = ["bm", "g1", "g2"].filter((k) => mp.st[k]).map((k) => "m-" + k).join(" ");
     const jn = juzStartAt(n, a);
     return `${jn ? `<div class="juz-mark">Juzuk ${jn}</div>` : ""}<article class="card ayah ${cls}" id="a${a}" data-a="${a}">
-      <div class="pills"><span class="pill no">${n}:${a}</span><span class="pill juz">Juzuk ${juzOf(n, a)}</span><span class="st-pills pills">${mp.pills}</span></div>
+      <div class="ayah-top">
+        <div class="pills"><span class="pill no">${n}:${a}</span><span class="pill juz">Juzuk ${juzOf(n, a)}</span><span class="st-pills pills">${mp.pills}</span></div>
+        <div class="acts">
+          <button class="icon-act" data-act="play" aria-label="Dengar ayat ${a}"><img src="assets/icon-play.png" alt=""></button>
+          <button class="icon-act ${mp.st.bm ? "on-bm" : ""}" data-act="mark" aria-label="Tanda ayat ${a}"><img src="assets/icon-bookmark.png" alt=""></button>
+        </div>
+      </div>
       <div class="arab" lang="ar" dir="rtl">${d.a[i]} <span class="aend">${arDigits(a)}</span></div>
       ${settings.translit ? `<div class="translit">${esc(d.t[i])}</div>` : ""}
       ${lang ? `<div class="trans">${esc(d[lang][i])}</div>` : ""}
-      <div class="acts">
-        <button class="act" data-act="play"><img src="assets/icon-play.png" alt=""><span>Dengar</span></button>
-        <button class="act ${mp.first ? "m-" + mp.first : ""}" data-act="mark"><img src="assets/icon-bookmark.png" alt=""><span>${mp.label}</span></button>
-      </div>
     </article>`;
   }
   function refreshMarks() {
@@ -369,9 +369,7 @@
       const a = +el.dataset.a, mp = markParts(current.n, a);
       ["bm", "g1", "g2"].forEach((k) => el.classList.toggle("m-" + k, mp.st[k]));
       el.querySelector(".st-pills").innerHTML = mp.pills;
-      const b = el.querySelector('[data-act="mark"]');
-      b.className = "act" + (mp.first ? " m-" + mp.first : "");
-      b.querySelector("span").textContent = mp.label;
+      el.querySelector('[data-act="mark"]').classList.toggle("on-bm", mp.st.bm);
     });
   }
 
@@ -458,8 +456,7 @@
       const on = !!(pl && current && pl.n === current.n && pl.a === +el.dataset.a);
       el.classList.toggle("playing", on);
       const b = el.querySelector('[data-act="play"]');
-      b.classList.toggle("on", on && !audio.paused);
-      b.querySelector("span").textContent = on && !audio.paused ? "Jeda" : "Dengar";
+      b.classList.toggle("on-play", on && !audio.paused);
       if (on && scroll) el.scrollIntoView({ block: "center", behavior: "smooth" });
     });
   }
