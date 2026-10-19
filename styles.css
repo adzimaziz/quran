@@ -258,8 +258,9 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .splash-hint { position: absolute; bottom: calc(14px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: rgba(255,253,248,.88); color: #0f5a50; padding: 6px 16px; border-radius: 999px; font-size: 15px; font-weight: 700; animation: pulse 1.6s infinite; }
 @keyframes pulse { 50% { opacity: .45; } }
 .ayah-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.acts { flex: none; display: flex; gap: 8px; }
-.icon-act { width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: transparent; display: grid; place-items: center; }
-.icon-act img { width: 44px; height: 44px; }
+.acts { flex: none; display: flex; gap: 10px; }
+.icon-act { position: relative; width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: transparent; display: grid; place-items: center; }
+.icon-act::before { content: ""; position: absolute; inset: -9px; } /* larger tap area than the icon */
+.icon-act img { width: 28px; height: 28px; }
 .icon-act.on-play { border-color: var(--emerald); }
 .icon-act.on-bm { border-color: var(--gold); background: var(--gold-soft); }

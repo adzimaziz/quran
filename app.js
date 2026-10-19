@@ -3,7 +3,7 @@
   const $ = (s) => document.querySelector(s);
   const app = $("#app");
   const AUDIO = "https://cdn.islamic.network/quran/audio/128/ar.alafasy/";
-  const VERSION_LABEL = "Versi 18";
+  const VERSION_LABEL = "Versi 19";
 
   // ---------- storage ----------
   const store = {
