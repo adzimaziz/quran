@@ -155,3 +155,5 @@ mark { background: color-mix(in srgb, var(--gold) 35%, transparent); color: inhe
 .refs h3 { margin: 0 0 6px; font-size: 16px; }
 .refs ul { margin: 0 0 8px; padding-left: 18px; font-size: 14px; }
 .refs li { margin-bottom: 4px; }
+.juz-ar { font-size: 20px; max-width: 45%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
+.juz-mark { text-align: center; margin: 14px 0 8px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; width: fit-content; margin-inline: auto; }

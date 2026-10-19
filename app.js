@@ -63,12 +63,12 @@
   window.addEventListener("hashchange", route);
 
   // ---------- home ----------
-  let homeState = { q: "", view: "menu" }; // view: menu | surah | mark
+  let homeState = { q: "", view: "menu", sort: "surah" }; // view: menu | surah | mark
   async function renderHome() {
     const list = await getMeta();
     document.title = "Al-Quran Digital";
     app.innerHTML = `
-      <section class="hero"><h1>Assalamualaikum 👋</h1><div class="muted">Baca Al-Quran 114 surah, 6,236 ayat</div></section>
+      <section class="hero"><h1>Assalamualaikum, mak 👋</h1><div class="muted">Baca Al-Quran 114 surah, 6,236 ayat</div></section>
       ${homeState.view === "menu" ? `
         <div class="menu-cards">
           <button class="menu-card" data-view="mark"><span class="mc-ico">🔖</span><b>Penanda buku</b><small>${bmCount() ? `${bmCount()} surah ada penanda` : "Belum ada penanda"}</small></button>
@@ -86,11 +86,16 @@
           <p class="muted small">Sila bandingkan dengan Mushaf bercetak. Jika ada kesilapan, maklumkan kepada Mohammad Adzim.</p>
         </section>` : `
         <button class="btn back" id="home-back">← Utama</button>
-        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
+        ${homeState.view === "surah" ? `<input id="q" class="search" type="search" placeholder="Cari surah atau kata dalam terjemahan…" value="${esc(homeState.q)}" autocomplete="off">
+          <div class="tabs"><button class="tab ${homeState.sort === "surah" ? "on" : ""}" data-sort="surah">Ikut surah</button><button class="tab ${homeState.sort === "juz" ? "on" : ""}" data-sort="juz">Ikut juzuk</button></div>` : `<h2 class="view-title">🔖 Penanda buku</h2>`}`}
       <div id="results"></div>`;
     app.querySelectorAll(".menu-card").forEach((b) => b.addEventListener("click", () => { homeState.view = b.dataset.view; renderHome(); }));
     const back = $("#home-back"); if (back) back.addEventListener("click", () => { homeState.view = "menu"; homeState.q = ""; renderHome(); });
-    const q = $("#q"); if (q) { q.addEventListener("input", (e) => { homeState.q = e.target.value; debounceResults(); }); if (!homeState.q) q.focus(); }
+    app.querySelectorAll(".tab[data-sort]").forEach((b) => b.addEventListener("click", () => {
+      homeState.sort = b.dataset.sort; if (homeState.sort === "juz") { homeState.q = ""; $("#q").value = ""; }
+      app.querySelectorAll(".tab[data-sort]").forEach((t) => t.classList.toggle("on", t === b)); renderResults();
+    }));
+    const q = $("#q"); if (q) { q.addEventListener("input", (e) => { homeState.q = e.target.value; if (homeState.q.trim() && homeState.sort === "juz") { homeState.sort = "surah"; app.querySelectorAll(".tab[data-sort]").forEach((t) => t.classList.toggle("on", t.dataset.sort === "surah")); } debounceResults(); }); if (!homeState.q && homeState.sort === "surah") q.focus(); }
     renderResults();
   }
   let rt; const debounceResults = () => { clearTimeout(rt); rt = setTimeout(renderResults, 200); };
@@ -100,6 +105,20 @@
     return `<li><a class="s-item" href="#/surah/${s.n}"><div class="s-num"><span>${s.n}</span></div>
       <div class="s-main"><b>${esc(s.t)}</b><small>${esc(s.id)} • ${s.type === "meccan" ? "Makkiyah" : "Madaniyah"} • ${s.v} ayat</small>${bm[s.n] ? `<small class="bm-tag">🔖 Penanda: ayat ${bm[s.n]}</small>` : ""}</div>
       <div class="s-ar">${s.ar}</div></a></li>`;
+  }
+  // First ayah of each juzuk: [surah, ayah] (standard Hafs division; juzuk n starts at JUZ[n-1]).
+  const JUZ = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
+  const juzStartAt = (s, a) => JUZ.findIndex(([js, ja]) => js === s && ja === a) + 1; // 0 if none
+  async function renderJuz(box, list) {
+    const token = (renderJuz.tok = {});
+    const data = await Promise.all(JUZ.map(([s]) => getSurah(s)));
+    if (renderJuz.tok !== token || homeState.view !== "surah" || homeState.sort !== "juz") return;
+    box.innerHTML = `<ul class="list">${JUZ.map(([s, a], i) => {
+      const words = data[i].a[a - 1].replace(/\u06DE\s*/g, "").split(" ").slice(0, 5).join(" ");
+      return `<li><a class="s-item" href="#/surah/${s}/${a}"><div class="s-num"><span>${i + 1}</span></div>
+        <div class="s-main"><b>Juzuk ${i + 1}</b><small>${esc(list[s - 1].t)}, ayat ${a}</small></div>
+        <div class="s-ar juz-ar">${words}…</div></a></li>`;
+    }).join("")}</ul>`;
   }
   async function renderResults() {
     const box = $("#results"); if (!box) return;
@@ -118,6 +137,7 @@
       }));
       return;
     }
+    if (!q && homeState.sort === "juz") { await renderJuz(box, list); return; }
     if (!q) { box.innerHTML = `<ul class="list">${list.map(surahRow).join("")}</ul>`; return; }
     const nq = norm(q);
     const num = /^\d+$/.test(q) ? +q : 0;
@@ -167,6 +187,8 @@
       ${showBism ? `<div class="bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>` : ""}`;
     for (let i = 0; i < d.a.length; i++) {
       const a = i + 1, marked = bm[n] === a;
+      const jn = juzStartAt(n, a);
+      if (jn) html += `<div class="juz-mark">Juzuk ${jn}</div>`;
       html += `<article class="ayah" id="a${a}" data-a="${a}">
         <div class="ayah-top"><span class="a-no">${n}:${a}</span><div class="a-tools">
           <button data-act="play" aria-label="Main">▶</button>
